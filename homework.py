@@ -1,4 +1,4 @@
-import os, requests,time, logging, sys
+import os, requests, time, logging, sys
 
 from dotenv import load_dotenv
 from telegram import Bot
@@ -95,6 +95,8 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
+    if not check_tokens():
+        return 0
     bot = Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     while True:
