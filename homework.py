@@ -1,7 +1,4 @@
-import os
-import requests
-import time
-import logging
+import os, requests,time, logging, sys
 
 from dotenv import load_dotenv
 from telegram import Bot
@@ -32,7 +29,7 @@ logging.basicConfig(
     format='%(asctime)s [%(levelname)s] %(message)s'
 )
 logger = logging.getLogger(__name__)
-handler = logging.StreamHandler()
+handler = logging.StreamHandler(stream=sys.stdout)
 logger.addHandler(handler)
 
 
