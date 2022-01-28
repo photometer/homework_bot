@@ -44,7 +44,7 @@ def send_message(bot, message):
             text=message
         )
         logging.info(f'Бот отправил сообщение {message}')
-    except:
+    except Exception:
         logging.error('Сбой при отправке сообщения')
 
 
@@ -68,21 +68,18 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Извлечение статуса конкретной домашней работы из общей информации
-    о ней.
-    """
+    """Извлечение статуса конкретной домашней работы."""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
     verdict = HOMEWORK_STATUSES[homework_status]
     if verdict:
-        return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+        return (f'Изменился статус проверки работы "{homework_name}". '
+            f'{verdict}')
     logging.error('Недокументированный статус домашней работы')
 
 
 def check_tokens():
-    """Проверка доступности переменных окружения, необходимых для работы
-    программы.
-    """
+    """Проверка доступности необходимых переменных окружения."""
     required_variables = {
         'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
