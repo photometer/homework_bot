@@ -1,0 +1,2 @@
+class APIStatusIsNotOKError(Exception):
+    pass
