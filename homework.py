@@ -37,10 +37,11 @@ logger.addHandler(handler)
 
 
 def send_message(bot, message):
+    """Отправка сообщения ботом."""
     try:
         bot.send_message(
-        chat_id=TELEGRAM_CHAT_ID,
-        text=message
+            chat_id=TELEGRAM_CHAT_ID,
+            text=message
         )
         logging.info(f'Бот отправил сообщение {message}')
     except:
@@ -48,7 +49,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
-    '''Отправка запроса к эндпоинту API сервиса Практикум.Домашка.'''
+    """Отправка запроса к эндпоинту API сервиса Практикум.Домашка."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
@@ -58,7 +59,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    '''Проверка ответа API на корректность.'''
+    """Проверка ответа API на корректность."""
     if isinstance(response, dict) & (len(response) == 2):
         homeworks = response.get('homeworks')
         if isinstance(homeworks, list):
@@ -67,8 +68,9 @@ def check_response(response):
 
 
 def parse_status(homework):
-    '''Извлечение статуса конкретной домашней работы из общей информации
-    о ней.'''
+    """Извлечение статуса конкретной домашней работы из общей информации
+    о ней.
+    """
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
     verdict = HOMEWORK_STATUSES[homework_status]
@@ -78,8 +80,9 @@ def parse_status(homework):
 
 
 def check_tokens():
-    '''Проверка доступности переменных окружения, необходимых для работы
-    программы.'''
+    """Проверка доступности переменных окружения, необходимых для работы
+    программы.
+    """
     required_variables = {
         'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
