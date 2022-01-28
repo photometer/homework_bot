@@ -73,8 +73,9 @@ def parse_status(homework):
     homework_status = homework.get('status')
     verdict = HOMEWORK_STATUSES[homework_status]
     if verdict:
-        return (f'Изменился статус проверки работы "{homework_name}". '
-            f'{verdict}')
+        return (
+            f'Изменился статус проверки работы "{homework_name}". {verdict}'
+        )
     logging.error('Недокументированный статус домашней работы')
 
 
