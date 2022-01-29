@@ -4,8 +4,10 @@ import time
 import logging
 import sys
 
+from http import HTTPStatus
 from dotenv import load_dotenv
 from telegram import Bot
+from telegram.error import TelegramError
 from exceptions import APIStatusIsNotOKError
 
 
@@ -45,7 +47,7 @@ def send_message(bot, message):
             text=message
         )
         logging.info(f'Бот отправил сообщение {message}')
-    except Exception:
+    except TelegramError:
         logging.error('Сбой при отправке сообщения')
 
 
@@ -54,7 +56,7 @@ def get_api_answer(current_timestamp):
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
-    if response.status_code != 200:
+    if response.status_code != HTTPStatus.OK:
         raise APIStatusIsNotOKError('Возникла ошибка при обращении к API')
     return response.json()
 
@@ -72,12 +74,22 @@ def parse_status(homework):
     """Извлечение статуса конкретной домашней работы."""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
-    verdict = HOMEWORK_STATUSES[homework_status]
+    for var_name, var in {
+        'homework_name': homework_name,
+        'homework_status': homework_status
+    }.items():
+        if not var:
+            message = f'{var_name} не передан'
+            logging.error(message)
+            raise KeyError(message)
+    verdict = HOMEWORK_STATUSES.get(homework_status)
     if verdict:
         return (
             f'Изменился статус проверки работы "{homework_name}". {verdict}'
         )
-    logging.error('Недокументированный статус домашней работы')
+    message = 'Недокументированный статус домашней работы'
+    logging.error(message)
+    raise ValueError(message)
 
 
 def check_tokens():
@@ -100,19 +112,21 @@ def check_tokens():
 def main():
     """Основная логика работы бота."""
     if not check_tokens():
-        return 0
+        sys.exit('Отсутствует обязательная переменная окружения. '
+                'Программа принудительно остановлена.')
     bot = Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     while True:
         try:
             response = get_api_answer(current_timestamp)
             homeworks = check_response(response)
-            if 'homeworks' in homeworks:
-                message = parse_status(homeworks)
+            message = parse_status(homeworks[0])
+            if message:
                 send_message(bot, message)
             else:
                 logging.debug('Новых статусов не обнаружено')
-            current_timestamp = int(time.time())
+            current_timestamp = response.get('current_date') or \
+                current_timestamp
             time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
