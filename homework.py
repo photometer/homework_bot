@@ -36,6 +36,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(stream=sys.stdout)
+formatter = logging.Formatter(
+    '%(asctime)s - %(lineno)s - %(message)s'
+)
+handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
