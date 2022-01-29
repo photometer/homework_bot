@@ -32,7 +32,7 @@ HOMEWORK_STATUSES = {
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] (%(lineno)s) %(message)s'
+    format='%(asctime)s [%(levelname)s] %(message)s'
 )
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(stream=sys.stdout)
@@ -122,8 +122,8 @@ def main():
         try:
             response = get_api_answer(current_timestamp)
             homeworks = check_response(response)
-            message = parse_status(homeworks(0))
-            if message:
+            if homeworks:
+                message = parse_status(homeworks[0])
                 send_message(bot, message)
             else:
                 logging.debug('Новых статусов не обнаружено')
