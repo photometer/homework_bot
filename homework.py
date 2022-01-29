@@ -32,14 +32,10 @@ HOMEWORK_STATUSES = {
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s'
+    format='%(asctime)s [%(levelname)s] (%(lineno)s) %(message)s'
 )
 logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(stream=sys.stdout)
-formatter = logging.Formatter(
-    '%(asctime)s - %(lineno)s - %(message)s'
-)
-handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
