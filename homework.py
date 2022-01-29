@@ -112,8 +112,10 @@ def check_tokens():
 def main():
     """Основная логика работы бота."""
     if not check_tokens():
-        sys.exit('Отсутствует обязательная переменная окружения. '
-                'Программа принудительно остановлена.')
+        sys.exit(
+            'Отсутствует обязательная переменная окружения. Программа '
+            'принудительно остановлена.'
+        )
     bot = Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     while True:
