@@ -127,8 +127,10 @@ def main():
                 send_message(bot, message)
             else:
                 logging.debug('Новых статусов не обнаружено')
-            current_timestamp = response.get('current_date') or \
+            current_timestamp = response.get(
+                'current_date',
                 current_timestamp
+            )
             time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
