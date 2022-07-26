@@ -24,9 +24,9 @@ HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
 
 HOMEWORK_STATUSES = {
-    'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
-    'reviewing': 'Работа взята на проверку ревьюером.',
-    'rejected': 'Работа проверена: у ревьюера есть замечания.'
+    'approved': 'Homework is checked: everithing is fine. Hooray!',
+    'reviewing': 'Homework submitted for the review.',
+    'rejected': 'Homework is checked: the reviewer has comments.'
 }
 
 
@@ -40,38 +40,38 @@ logger.addHandler(handler)
 
 
 def send_message(bot, message):
-    """Отправка сообщения ботом."""
+    """Sending message by bot."""
     try:
         bot.send_message(
             chat_id=TELEGRAM_CHAT_ID,
             text=message
         )
-        logging.info(f'Бот отправил сообщение {message}')
+        logging.info(f'Bot sent message {message}')
     except TelegramError:
-        logging.error('Сбой при отправке сообщения')
+        logging.error('Error while sending the message')
 
 
 def get_api_answer(current_timestamp):
-    """Отправка запроса к эндпоинту API сервиса Практикум.Домашка."""
+    """Sending a request to the endpoint of Practicum.Homework API."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
     if response.status_code != HTTPStatus.OK:
-        raise APIStatusIsNotOKError('Возникла ошибка при обращении к API')
+        raise APIStatusIsNotOKError('Error while accessing the API')
     return response.json()
 
 
 def check_response(response):
-    """Проверка ответа API на корректность."""
+    """API response check for correctness."""
     if isinstance(response, dict) & (len(response) == 2):
         homeworks = response.get('homeworks')
         if isinstance(homeworks, list):
             return homeworks
-    raise TypeError('Получен некорректный ответ API')
+    raise TypeError('Incorrect API response is received')
 
 
 def parse_status(homework):
-    """Извлечение статуса конкретной домашней работы."""
+    """Getting the specific homework status."""
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
     for var_name, var in {
@@ -79,21 +79,21 @@ def parse_status(homework):
         'homework_status': homework_status
     }.items():
         if not var:
-            message = f'{var_name} не передан'
+            message = f'{var_name} not sent'
             logging.error(message)
             raise KeyError(message)
     verdict = HOMEWORK_STATUSES.get(homework_status)
     if verdict:
         return (
-            f'Изменился статус проверки работы "{homework_name}". {verdict}'
+            f'Check status change for homework "{homework_name}". {verdict}'
         )
-    message = 'Недокументированный статус домашней работы'
+    message = 'Unknown homework status'
     logging.error(message)
     raise ValueError(message)
 
 
 def check_tokens():
-    """Проверка доступности необходимых переменных окружения."""
+    """Checking the availability of required environment variables."""
     required_variables = {
         'PRACTICUM_TOKEN': PRACTICUM_TOKEN,
         'TELEGRAM_TOKEN': TELEGRAM_TOKEN,
@@ -102,19 +102,19 @@ def check_tokens():
     for var_name, variable in required_variables.items():
         if not variable:
             logging.critical(
-                f'Отсутствует обязательная переменная окружения: {var_name}. '
-                'Программа принудительно остановлена.'
+                f'Required environment variable is not found: {var_name}. '
+                'The program is forcibly stopped.'
             )
             return False
     return True
 
 
 def main():
-    """Основная логика работы бота."""
+    """The main logic of the bot."""
     if not check_tokens():
         sys.exit(
-            'Отсутствует обязательная переменная окружения. Программа '
-            'принудительно остановлена.'
+            'Required environment variable is not found. The program is '
+            'forcibly stopped.'
         )
     bot = Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
@@ -126,14 +126,14 @@ def main():
                 message = parse_status(homeworks[0])
                 send_message(bot, message)
             else:
-                logging.debug('Новых статусов не обнаружено')
+                logging.debug('No new statuses')
             current_timestamp = response.get(
                 'current_date',
                 current_timestamp
             )
             time.sleep(RETRY_TIME)
         except Exception as error:
-            message = f'Сбой в работе программы: {error}'
+            message = f'Error while program operation: {error}'
             logging.error(message)
             send_message(bot, message)
             time.sleep(RETRY_TIME)
